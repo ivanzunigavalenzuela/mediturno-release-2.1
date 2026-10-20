@@ -4,3 +4,5 @@ target/
 allure-results/
 .idea/
 *.iml
+Claude outputs/
+.jqwik-database

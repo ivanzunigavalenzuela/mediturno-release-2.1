@@ -64,7 +64,7 @@ public class ConfiguracionKafka {
      * <p>Un JSON que no se puede interpretar no mejora reintentando: va directo a la DLQ.</p>
      */
     @Bean
-    public DefaultErrorHandler manejadorDeErrores(KafkaTemplate<String, String> plantilla) {
+    public DefaultErrorHandler manejadorDeErroresKafka(KafkaTemplate<String, String> plantilla) {
         DeadLetterPublishingRecoverer aLaDlq = new DeadLetterPublishingRecoverer(plantilla,
                 (registro, excepcion) -> new TopicPartition(
                         Topics.dlqDe(registro.topic()), registro.partition()));
