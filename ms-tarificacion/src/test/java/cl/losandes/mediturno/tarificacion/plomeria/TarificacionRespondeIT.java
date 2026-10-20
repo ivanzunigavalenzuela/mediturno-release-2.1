@@ -1,5 +1,6 @@
 package cl.losandes.mediturno.tarificacion.plomeria;
 
+import cl.losandes.mediturno.tarificacion.api.MsTarificacionApplication;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * interesa que el servicio esté contestando y que la forma de la respuesta sea la que
  * ms-reservas espera.</p>
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = MsTarificacionApplication.class,
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TarificacionRespondeIT {
 
     private static final String SOLICITUD = """
