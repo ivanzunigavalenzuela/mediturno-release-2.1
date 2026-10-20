@@ -22,7 +22,7 @@ public class ReservaWebController {
         this.servicio = servicio;
     }
 
-    @GetMapping("/")
+    @GetMapping({"/", "/reservas"})
     public String listado(@RequestParam(required = false) String rut, Model model) {
         List<Reserva> reservas = servicio.listar(rut);
         model.addAttribute("reservas", reservas);
