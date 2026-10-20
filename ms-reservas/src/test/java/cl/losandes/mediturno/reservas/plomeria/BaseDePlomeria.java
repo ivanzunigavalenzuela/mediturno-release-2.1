@@ -6,7 +6,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
 /**
@@ -22,6 +22,12 @@ import org.testcontainers.utility.DockerImageName;
  * <p>Los contenedores son estáticos: se levantan una vez y los comparten todas las
  * pruebas que heredan de esta clase. Levantar Kafka por cada prueba haría la suite
  * inviable.</p>
+ *
+ * <p>Se inician a mano en el bloque estático, y no con {@code @Testcontainers} y
+ * {@code @Container}: esas anotaciones detienen los contenedores al terminar cada clase
+ * de prueba, mientras Spring reutiliza el contexto en caché, que queda apuntando a
+ * puertos que ya no existen. Arrancados una sola vez, viven toda la ejecución y Ryuk
+ * los elimina al final.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
@@ -35,10 +41,8 @@ import org.testcontainers.utility.DockerImageName;
                 "spring.jpa.hibernate.ddl-auto=create-drop"
         })
 @ActiveProfiles("plomeria")
-@Testcontainers
 public abstract class BaseDePlomeria {
 
-    @org.testcontainers.junit.jupiter.Container
     @ServiceConnection
     static final PostgreSQLContainer<?> POSTGRES =
             new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"))
@@ -46,14 +50,16 @@ public abstract class BaseDePlomeria {
                     .withUsername("mediturno")
                     .withPassword("mediturno");
 
-    @org.testcontainers.junit.jupiter.Container
     @ServiceConnection(name = "redis")
     static final GenericContainer<?> REDIS =
             new GenericContainer<>(DockerImageName.parse("redis:7-alpine"))
                     .withExposedPorts(6379);
 
-    @org.testcontainers.junit.jupiter.Container
     @ServiceConnection
     static final KafkaContainer KAFKA =
             new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.7.0"));
+
+    static {
+        Startables.deepStart(POSTGRES, REDIS, KAFKA).join();
+    }
 }
